@@ -1,0 +1,52 @@
+# Competition data and generated artifacts
+data/
+dataset/
+datasets/
+raw_data/
+processed_data/
+
+*.parquet
+*.feather
+
+output/*
+!output/.gitkeep
+
+submissions/
+predictions/
+candidate_pairs/
+
+models/*
+!models/README.md
+*.pkl
+*.pickle
+*.joblib
+*.cbm
+*.pt
+*.pth
+*.onnx
+
+logs/*
+!logs/README.md
+*.log
+
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Secrets and editor files
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
