@@ -1,0 +1,8 @@
+random_seed: 42
+
+candidate_top_k: 30
+
+model:
+  type: catboost
+
+threshold: 0.5
