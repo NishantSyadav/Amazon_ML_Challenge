@@ -1,0 +1,11 @@
+artifacts/
+__pycache__/
+*.pyc
+dataset/
+data/
+*.tsv
+.venv/
+venv/
+*.pkl
+*.joblib
+*.cbm
