@@ -1,56 +1,231 @@
-# quick and dirty text cleanup for business names/addresses.
-# this is just for blocking (matching TF-IDF text + exact-match keys) -
-# Nishant's feature-engineering normalization for the actual model can be
-# stricter/different, doesn't need to match this exactly.
-
 import re
 import unicodedata
-
-LEGAL_SUFFIXES = {
-    "pvt": "private", "ltd": "limited", "corp": "corporation",
-    "inc": "incorporated", "co": "company", "llc": "llc",
-    "llp": "llp", "plc": "plc",
-}
-
-ADDRESS_ABBR = {
-    "rd": "road", "st": "street", "ave": "avenue", "blvd": "boulevard",
-    "apt": "apartment", "no": "number", "flr": "floor", "bldg": "building",
-    "dist": "district", "twp": "township",
-}
-
-PUNCT_RE = re.compile(r"[^\w\s]")
-WS_RE = re.compile(r"\s+")
+import pandas as pd
 
 
-def strip_accents(s):
-    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+# =========================================================
+# Basic text normalization
+# =========================================================
+
+def normalize_text(text):
+    """
+    Basic language-independent normalization.
+
+    - Missing values -> ""
+    - Unicode normalization
+    - Case folding
+    - Whitespace normalization
+    """
+
+    if pd.isna(text):
+        return ""
+
+    text = str(text)
+
+    # Normalize Unicode representation
+    text = unicodedata.normalize("NFKC", text)
+
+    # Case-insensitive normalization
+    text = text.casefold()
+
+    # Normalize whitespace
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
 
 
-def expand(tokens, mapping):
-    return [mapping.get(t, t) for t in tokens]
+# =========================================================
+# Accent normalization
+# =========================================================
 
+def remove_accents(text):
+    """
+    Remove combining accent marks while preserving
+    the base Unicode characters.
+
+    Example:
+        Énterprises -> Enterprises
+        Bóral -> Boral
+
+    Non-Latin scripts are preserved.
+    """
+
+    if not text:
+        return ""
+
+    text = unicodedata.normalize("NFKD", text)
+
+    result = []
+
+    for char in text:
+        # Only remove combining marks
+        if unicodedata.category(char) != "Mn":
+            result.append(char)
+
+    return "".join(result)
+
+
+# =========================================================
+# Name normalization
+# =========================================================
 
 def normalize_name(name):
-    if not isinstance(name, str) or not name:
-        return ""
-    s = strip_accents(name.lower()).replace("&", " and ")
-    s = PUNCT_RE.sub(" ", s)
-    tokens = expand(s.split(), LEGAL_SUFFIXES)
-    return WS_RE.sub(" ", " ".join(tokens)).strip()
+    """
+    Conservative business-name normalization.
 
+    Preserves Unicode scripts and meaningful characters.
+    """
+
+    text = normalize_text(name)
+
+    if not text:
+        return ""
+
+    # Standardize ampersand
+    text = text.replace("&", " and ")
+
+    # Replace punctuation/symbols with spaces.
+    # Unicode letters and numbers are preserved.
+    cleaned = []
+
+    for char in text:
+        category = unicodedata.category(char)
+
+        if category[0] in ("L", "N"):
+            cleaned.append(char)
+
+        elif category.startswith("M"):
+            # Preserve Unicode combining marks
+            cleaned.append(char)
+
+        else:
+            cleaned.append(" ")
+
+    text = "".join(cleaned)
+
+    # Normalize whitespace
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
+def normalize_name_ascii(name):
+    """
+    Accent-normalized name representation.
+
+    This does NOT mean ASCII-only.
+    Non-Latin scripts are preserved.
+    """
+
+    text = normalize_name(name)
+
+    return remove_accents(text)
+
+
+# =========================================================
+# Address normalization
+# =========================================================
 
 def normalize_address(address):
-    if not isinstance(address, str) or not address:
-        return ""
-    s = strip_accents(address.lower())
-    s = PUNCT_RE.sub(" ", s)
-    tokens = expand(s.split(), ADDRESS_ABBR)
-    return WS_RE.sub(" ", " ".join(tokens)).strip()
+    """
+    Conservative address normalization.
 
+    Important:
+    Numbers and alphanumeric components are preserved.
+    """
+
+    text = normalize_text(address)
+
+    if not text:
+        return ""
+
+    cleaned = []
+
+    for char in text:
+        category = unicodedata.category(char)
+
+        if category[0] in ("L", "N"):
+            cleaned.append(char)
+
+        elif category.startswith("M"):
+            cleaned.append(char)
+
+        elif char in "-":
+            # Preserve address formats such as:
+            # E-3A
+            # 1056-1060
+            # AF-684
+            cleaned.append(char)
+
+        else:
+            cleaned.append(" ")
+
+    text = "".join(cleaned)
+
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
+def normalize_address_ascii(address):
+    """
+    Accent-normalized address representation.
+    """
+
+    text = normalize_address(address)
+
+    return remove_accents(text)
+
+
+# =========================================================
+# Token utilities
+# =========================================================
+
+def tokenize(text):
+    """
+    Split normalized text into tokens.
+    """
+
+    if not text:
+        return []
+
+    return text.split()
+
+
+def token_set(text):
+    """
+    Return unique tokens.
+    """
+
+    return set(tokenize(text))
+
+
+# =========================================================
+# Numeric utilities
+# =========================================================
 
 def extract_numbers(text):
-    """pulls house/PIN/unit numbers out - language independent, works fine on
-    French addresses too even though we've never seen one in training."""
-    if not isinstance(text, str):
+    """
+    Extract numeric components from a string.
+
+    Example:
+        '3315 Fremont Street'
+        -> ['3315']
+    """
+
+    if not text:
         return []
-    return re.findall(r"\d+", text)
+
+    return re.findall(r"\d+", str(text))
+
+
+# =========================================================
+# Missing-value utility
+# =========================================================
+
+def has_value(text):
+    """
+    Return True if the value contains usable text.
+    """
+
+    return bool(text and str(text).strip())
