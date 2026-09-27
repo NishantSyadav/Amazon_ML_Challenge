@@ -1,4 +1,4 @@
-from features import build_pair_features
+﻿from src.nishant_features import build_pair_features
 
 
 examples = [
@@ -7,7 +7,7 @@ examples = [
         "address1": "3315 Fremont Street, Peoria, IL",
         "country1": "US",
 
-        "name2": "Payne Énterprises",
+        "name2": "Payne Ã‰nterprises",
         "address2": "3315 FREMONT ST, PEORIA, IL",
         "country2": "US",
 
@@ -21,7 +21,7 @@ examples = [
         "address1": "1056 Belden Avenue, Akron, OH",
         "country1": "US",
 
-        "name2": "Lumay Bóral Inc.",
+        "name2": "Lumay BÃ³ral Inc.",
         "address2": "1056-1060 BELDEN AVE, PO BOX 8807, AKRON, OH",
         "country2": "US",
 

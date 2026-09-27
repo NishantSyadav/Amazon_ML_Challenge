@@ -1,4 +1,4 @@
-from normalize import (
+﻿from src.normalize import (
     normalize_name,
     normalize_name_ascii,
     normalize_address,
@@ -8,11 +8,11 @@ from normalize import (
 
 
 examples = [
-    "Payne Énterprises",
-    "Lumay Bóral Inc.",
+    "Payne Ã‰nterprises",
+    "Lumay BÃ³ral Inc.",
     "Hendricks and  Flowers Inc",
     "Maure Williams Colombier Inc",
-    "राज Investments LLP",
+    "à¤°à¤¾à¤œ Investments LLP",
 ]
 
 
