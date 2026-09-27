@@ -146,3 +146,8 @@ readiness/verification records are ignored by Git; the ZIP contains their final 
 Final threshold is **0.560**, selected after full-scale retrieval changed. On the
 original 1,000 held-out S1, macro F0.5 improves from 0.829989 at 0.610 to 0.831200
 at 0.560. No model retraining was performed; these remain internal tuning results.
+
+The packaging command runs from the Git checkout, where it can verify the clean
+source commit and local validation evidence. Recipients of the ZIP can regenerate
+both TSVs from the packaged `code/business_entity_resolution/` directory and the
+official test data; a Git checkout is not needed for indexing, inference, or QA.

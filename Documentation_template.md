@@ -56,9 +56,9 @@ we quantify recall on held-out training entities rather than assuming no loss.
 
 **Model:** existing CatBoost binary classifier,
 `artifacts/experiments/baseline_v31/baseline_v1_catboost.cbm`.
-The saved model has 600 trees; training configuration was depth7, learning rate .05,
-seed42, maximum600 iterations, early stopping, and no automatic class weighting.
-CatBoost is Apache License2.0; this is a small task-trained tree model, far below the
+The saved model has 600 trees; training configuration was depth 7, learning rate .05,
+seed 42, maximum 600 iterations, early stopping, and no automatic class weighting.
+CatBoost is Apache License 2.0; this is a small task-trained tree model, far below the
 8-billion-parameter limit. No foundation model is used.
 
 **Feature order (asserted against model.feature_names_):**
@@ -86,16 +86,16 @@ and have zero similarity. Derived features use float64 arithmetic before convers
 to CatBoost float32 input. No inference-only suffix substitutions are introduced.
 
 **Final threshold: 0.560.** It was selected by macro F0.5 optimization after the
-retrieval distribution changed. On the same 1,000 held-out entities, threshold0.610
-scores0.829989; threshold0.560 scores0.831200. The existing model was not retrained.
+retrieval distribution changed. On the same 1,000 held-out entities, threshold 0.610
+scores 0.829989; threshold 0.560 scores 0.831200. The existing model was not retrained.
 
 ## 5. Results and Error Analysis
 
-The original entity split is reconstructed exactly: sample5,000 IDs from the stored
-validation-ID list using random_state42, then split 80/20 with random_state123.
-The saved model's4,000 training S1 entities and1,000 validation S1 entities are
+The original entity split is reconstructed exactly: sample 5,000 IDs from the stored
+validation-ID list using random_state 42, then split 80/20 with random_state 123.
+The saved model's 4,000 training S1 entities and 1,000 validation S1 entities are
 disjoint. Zero-candidate entities remain in the evaluation universe. The final
-retriever is evaluated against all10,320,219 training S2/S3 records.
+retriever is evaluated against all 10,320,219 training S2/S3 records.
 
 | Final retriever diagnostic | Value |
 |---|---:|
@@ -105,16 +105,16 @@ retriever is evaluated against all10,320,219 training S2/S3 records.
 | Any-match entity recall | 96.940928% |
 | Complete entity recall | 64.978903% |
 | Candidate oracle macro F0.5 | 0.931115 |
-| Model macro F0.5 at0.610 | 0.829989 |
-| Model macro F0.5 at0.560 | 0.831200 |
+| Model macro F0.5 at 0.610 | 0.829989 |
+| Model macro F0.5 at 0.560 | 0.831200 |
 | Exact-key overflow events in validation | 0 |
 
 These are **internal sampled validation diagnostics, not leaderboard results**.
 The threshold was tuned on this validation set, so its score is not an unbiased
 estimate from a separate final test set. France has no labeled training examples.
 
-Historical sampled V3.1 results were link recall83.8402%, any-match recall95.5829%,
-complete recall67.9337%, candidate oracle0.919427, model0.816031 at0.610, and roughly
+Historical sampled V3.1 results were link recall 83.8402%, any-match recall 95.5829%,
+complete recall 67.9337%, candidate oracle 0.919427, model 0.816031 at 0.610, and roughly
 106.06 candidates/S1. Historical candidate diagnostics and current held-out metrics
 need not use the same entity subset; do not interpret them as a controlled full-test
 leaderboard comparison. Short-only full-scale retrieval was rejected after scoring
@@ -129,15 +129,15 @@ is unavailable, so no claims about specific test false positives/negatives are m
 
 The single entry point is `python -m src.pipeline run`. Source2/3 indexing streams
 records. Inference uses six worker processes for the final run, one CatBoost thread
-each,500-entity batches, and at most two pending batches per worker. Results are
+each, 500-entity batches, and at most two pending batches per worker. Results are
 written in Source1 order, with comma-separated deduplicated IDs and empty fields for
 zero matches. Source/model SHA-256 manifests bind outputs to the executed code.
 
-Scalability gates passed at1,000,10,000,and50,000 Source1 entities against the entire
-test target universe. The50,000 run took70.4seconds, scored1,921,941 candidates,
-preserved7,485 France rows, and had no exact-key overflow. Sum-of-process RSS peaked
-at2.61GiB (shared mapped pages can be counted multiple times); system available RAM
-remained at least4.13GiB. Full-run counts and memory observations are recorded in the
+Scalability gates passed at 1,000, 10,000, and 50,000 Source1 entities against the entire
+test target universe. The 50,000 run took 70.4 seconds, scored 1,921,941 candidates,
+preserved 7,485 France rows, and had no exact-key overflow. Sum-of-process RSS peaked
+at 2.61 GiB (shared mapped pages can be counted multiple times); system available RAM
+remained at least 4.13 GiB. Full-run counts and memory observations are recorded in the
 readiness report once all completion gates pass.
 
 Strict QA checks exact row counts and headers, original S1 identities, global
@@ -145,7 +145,7 @@ uniqueness, country coverage, empty rows, duplicate/invalid target IDs, all targ
 existence, TSV readback, and the candidate-subset invariant. The supplied official
 validator is unchanged (SHA-256
 `f96f59934383a15095914f507620c078c474e8f9c60e864b2d051ed173a22dfc`).
-It runs over exhaustive disjoint20,000-row partitions to bound its in-memory sets;
+It runs over exhaustive disjoint 20,000-row partitions to bound its in-memory sets;
 global Source1 uniqueness/order are checked separately. Its subset warning is
 promoted to a failure. Strict disk-backed QA supplies the optional target-ID check.
 Official transcripts and hash-bound reports are included in `verification/`.
