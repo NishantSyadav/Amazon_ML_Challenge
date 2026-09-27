@@ -2,7 +2,7 @@ import re
 import numpy as np
 from rapidfuzz import fuzz
 
-from normalize import (
+from .normalize import (
     normalize_name,
     normalize_name_ascii,
     normalize_address,

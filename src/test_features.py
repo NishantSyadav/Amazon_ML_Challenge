@@ -1,4 +1,4 @@
-from features import build_pair_features
+from .features import build_pair_features
 
 
 examples = [

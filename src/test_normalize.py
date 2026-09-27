@@ -1,4 +1,4 @@
-from normalize import (
+from .normalize import (
     normalize_name,
     normalize_name_ascii,
     normalize_address,
