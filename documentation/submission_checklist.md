@@ -1,0 +1,21 @@
+# Submission checklist
+
+- [ ] Final `output/matching_results.tsv` is generated for upload.
+- [ ] Final `output/candidate_pairs.tsv` is generated and preserved with the matching file.
+- [ ] Every required test Source1 appears exactly once.
+- [ ] No duplicate Source1 entities.
+- [ ] Predicted matches are contained in candidate pairs.
+- [ ] Expected formatting and schema are confirmed.
+- [ ] No malformed records.
+- [ ] No accidental index column.
+- [ ] No unexpected NaNs where prohibited.
+- [ ] Output paths are correct.
+- [ ] Internal pre-submission QA validator passes.
+- [ ] Official validator passes on the exact final files; do not upload on failure.
+- [ ] Experiment ID is recorded.
+- [ ] Exact Git commit and branch are recorded.
+- [ ] Candidate-generation configuration, feature configuration, model/configuration, and decision threshold are recorded.
+- [ ] Submission number for the current day is checked; fewer than five submissions have already been used today.
+- [ ] File intended for upload matches the recorded experiment and passes validation.
+- [ ] After upload, record the submission number and public leaderboard score when available.
+- [ ] Preserve old submission rows; fill later results in their original rows without replacing their configuration or outputs.
