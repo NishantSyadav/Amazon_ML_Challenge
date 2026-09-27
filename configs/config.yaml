@@ -5,4 +5,4 @@ candidate_top_k: 30
 model:
   type: catboost
 
-threshold: 0.5
+threshold: 0.560

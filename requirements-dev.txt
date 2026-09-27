@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest==9.1.1
+# Legacy TF-IDF experiments only; not used by the final pipeline.
+sparse-dot-topn==1.2.0

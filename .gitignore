@@ -51,3 +51,4 @@ work/
 submission_package/
 *.zip
 src/baseline_candidates_experimental_v2.py
+SUBMISSION_READINESS.md
