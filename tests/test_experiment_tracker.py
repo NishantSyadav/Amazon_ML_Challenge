@@ -100,3 +100,54 @@ def test_existing_rows_are_preserved(tmp_path):
     assert after[0] == before
     assert after[0]["notes"] == "First observation"
     assert len(after) == 2
+
+
+def test_prepared_output_does_not_count(tmp_path):
+    path = _tracker(tmp_path)
+    append_experiment(path, _record(
+        "E001", status="prepared", validator_status="",
+        submission_file="output/matching_results.tsv",
+        candidate_file="output/candidate_pairs.tsv",
+    ))
+    rows = load_tracker(path)
+    assert count_daily_submissions(rows, "2026-09-26") == 0
+    assert can_submit_today(rows, "2026-09-26")
+    assert rows[0]["submission_number_for_day"] == ""
+
+
+def test_validated_output_with_pass_does_not_count(tmp_path):
+    path = _tracker(tmp_path)
+    append_experiment(path, _record(
+        "E001", status="validated", validator_status="PASS",
+        submission_file="output/matching_results.tsv",
+        candidate_file="output/candidate_pairs.tsv",
+    ))
+    assert count_daily_submissions(load_tracker(path), "2026-09-26") == 0
+
+
+def test_multiple_explicit_uploads_are_counted_by_date(tmp_path):
+    path = _tracker(tmp_path)
+    append_experiment(path, _record("E001", "1"))
+    append_experiment(path, _record("E002", "2"))
+    append_experiment(path, _record("E003", "1", date="2026-09-27"))
+    rows = load_tracker(path)
+    assert count_daily_submissions(rows, "2026-09-26") == 2
+    assert count_daily_submissions(rows, "2026-09-27") == 1
+    assert count_daily_submissions(rows, "2026-09-28") == 0
+
+
+def test_submission_number_does_not_imply_upload(tmp_path):
+    record = _record("E001", "1", status="prepared")
+    assert count_daily_submissions([record], "2026-09-26") == 0
+    path = _tracker(tmp_path)
+    _expect_value_error(
+        lambda: append_experiment(path, record),
+        "Unsubmitted experiments must not have a submission number",
+    )
+    assert load_tracker(path) == []
+
+
+def test_final_selected_is_an_already_uploaded_submission(tmp_path):
+    path = _tracker(tmp_path)
+    append_experiment(path, _record("E001", "1", status="final_selected"))
+    assert count_daily_submissions(load_tracker(path), "2026-09-26") == 1

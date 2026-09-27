@@ -56,11 +56,8 @@ def load_tracker(path: str | Path) -> list[dict[str, str]]:
 
 
 def _is_submission(row: Mapping[str, str]) -> bool:
-    return bool(
-        row.get("submission_number_for_day")
-        or row.get("submission_file")
-        or row.get("status") in {"submitted", "final_selected"}
-    )
+    """Count only explicit uploads; final_selected denotes an already uploaded run."""
+    return row.get("status") in {"submitted", "final_selected"}
 
 
 def count_daily_submissions(rows: Iterable[Mapping[str, str]], date: str) -> int:
@@ -101,7 +98,9 @@ def append_experiment(path: str | Path, record: Mapping[str, str]) -> None:
         if not can_submit_today(rows, date):
             raise ValueError(f"Five submissions are already recorded for {date}")
         if any(
-            row.get("date") == date and row.get("submission_number_for_day") == number
+            _is_submission(row)
+            and row.get("date") == date
+            and row.get("submission_number_for_day") == number
             for row in rows
         ):
             raise ValueError(f"Submission number {number} is already recorded for {date}")
@@ -119,7 +118,7 @@ def append_experiment(path: str | Path, record: Mapping[str, str]) -> None:
         if Path(record["candidate_file"]).name != "candidate_pairs.tsv":
             raise ValueError("candidate_file must be candidate_pairs.tsv")
     elif number:
-        raise ValueError("Validation-only experiments must not have a submission number")
+        raise ValueError("Unsubmitted experiments must not have a submission number")
 
     with Path(path).open("a", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=columns)
